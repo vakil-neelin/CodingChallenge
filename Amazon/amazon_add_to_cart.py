@@ -10,7 +10,7 @@ class AmazonAddToCart(unittest.TestCase):
         cls.amazon_store_handler = AmazonStoreHandler(headless=False)
         return
 
-    def test_amazon_search(self):
+    def test_amazon_add_to_cart(self):
         search_result_item_index = 0
 
         print("Step 1: Verify Cart Is Empty...")

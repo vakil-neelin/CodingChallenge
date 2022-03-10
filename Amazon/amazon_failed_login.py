@@ -14,7 +14,7 @@ class AmazonFailedLogin(unittest.TestCase):
         cls.amazon_store_handler = AmazonStoreHandler(headless=False)
         return
 
-    def test_amazon_search(self):
+    def test_amazon_failed_login(self):
         print("Step 1: Navigate To The Login Page...")
         self.amazon_store_handler.navigate_to_login()
         print("success")
