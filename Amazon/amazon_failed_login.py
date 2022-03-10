@@ -6,7 +6,7 @@ invalid_username = "test@test.com"
 invalid_password = "invalidpassword"
 
 
-class MyTestCase(unittest.TestCase):
+class AmazonFailedLogin(unittest.TestCase):
     amazon_store_handler = None
 
     @classmethod

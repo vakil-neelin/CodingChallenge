@@ -2,7 +2,7 @@ import unittest
 from amazon_store_handler import *
 
 
-class MyTestCase(unittest.TestCase):
+class AmazonAddToCart(unittest.TestCase):
     amazon_store_handler = None
 
     @classmethod

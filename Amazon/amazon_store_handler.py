@@ -1,4 +1,4 @@
-from time import sleep
+import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -21,6 +21,10 @@ LOGIN_ERROR_MESSAGE_BOX_ID = "auth-error-message-box"
 SHOPPING_CART_BUTTON_ID = "nav-cart"
 SHOPPING_CART_ID = "sc-active-cart"
 SHOPPING_CART_ITEM_ID = "sc-list-item"
+SEARCH_RESULT_PRICE_CLASS_NAME = "a-price"
+SEARCH_RESULT_PAGE_CLASS_NAME = "s-pagination-strip"
+SEARCH_RESULTS_XPATH = '//div[@data-component-type="s-search-result"]'
+SEARCH_RESULT_INFO_BAR = '//span[@data-component-type="s-result-info-bar"]'
 
 
 class AmazonStoreHandler(object):
@@ -40,6 +44,9 @@ class AmazonStoreHandler(object):
 
         # Start The Window Full-Screen
         self.driver.maximize_window()
+
+        # Clear Cookies
+        self.driver.delete_all_cookies()
 
         # Opens The Amazon Store Page
         self.driver.get(AMAZON_URL)
@@ -77,24 +84,15 @@ class AmazonStoreHandler(object):
         results = []
 
         self.web_driver_wait.until(expected_conditions.
-                                   visibility_of_element_located((By.CLASS_NAME, "s-pagination-strip")))
+                                   visibility_of_element_located((By.CLASS_NAME, SEARCH_RESULT_PAGE_CLASS_NAME)))
 
-        elements = self.driver.find_elements(By.XPATH, '//div[@data-component-type="s-search-result"]')
+        elements = self.driver.find_elements(By.XPATH, SEARCH_RESULTS_XPATH)
 
         for element in elements:
-            title = element.find_element(By.TAG_NAME, "h2")
-            title = title.text
-
-            page_link = element.find_element(By.TAG_NAME, "a")
-            page_link = page_link.get_attribute("href")
-
-            try:
-                price = element.find_element(By.CLASS_NAME, "a-price")
-                price = price.text.replace("\n", ".")
-            except NoSuchElementException:
-                price = "$0.00"
-
-            results.append([title, price])
+            if "AdHolder" not in element.get_attribute("class"):
+                title = element.find_element(By.TAG_NAME, "h2")
+                title = title.text
+                results.append(title)
 
         return results
 
@@ -211,3 +209,23 @@ class AmazonStoreHandler(object):
                 pass
 
         return items_in_cart
+
+    def get_number_search_results_from_item_range(self):
+        expected_search_results = 0
+
+        self.web_driver_wait.until(expected_conditions.
+                                   visibility_of_element_located((By.CLASS_NAME, SEARCH_RESULT_PAGE_CLASS_NAME)))
+
+        # Find The Element Containing The Range Of Search Results
+        search_range_element = self.driver.find_element(By.XPATH, SEARCH_RESULT_INFO_BAR)
+        search_range_element = search_range_element.find_element(By.TAG_NAME, "h1")
+
+        # Pull Range From Element Text
+        result_range_pattern = re.compile('(\d+)-(\d+)')
+        results = result_range_pattern.findall(search_range_element.text)
+        if results and results[0]:
+            beginning = int(results[0][0])
+            end = int(results[0][1])
+            expected_search_results = end - beginning + 1
+
+        return expected_search_results
