@@ -7,7 +7,7 @@ class AmazonAddToCart(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.amazon_store_handler = AmazonStoreHandler(headless=False)
+        cls.amazon_store_handler = AmazonStoreHandler()
         return
 
     def test_amazon_add_to_cart(self):
@@ -31,7 +31,10 @@ class AmazonAddToCart(unittest.TestCase):
         self.amazon_store_handler.navigate_to_cart()
         self.assertEqual(self.amazon_store_handler.get_number_of_items_in_cart(), 1)
         items_in_cart = self.amazon_store_handler.get_items_in_cart()
-        self.assertEqual(items_in_cart[0], search_results[search_result_item_index])
+
+        # Adjust Cart Title To Handle Title Clipping
+        item_in_cart = items_in_cart[0][0].replace("…", "")
+        self.assertIn(item_in_cart, search_results[search_result_item_index])
         print("success")
         return
 

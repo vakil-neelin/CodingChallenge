@@ -25,17 +25,16 @@ SEARCH_RESULT_PRICE_CLASS_NAME = "a-price"
 SEARCH_RESULT_PAGE_CLASS_NAME = "s-pagination-strip"
 SEARCH_RESULTS_XPATH = '//div[@data-component-type="s-search-result"]'
 SEARCH_RESULT_INFO_BAR = '//span[@data-component-type="s-result-info-bar"]'
+ADD_TO_CART_BUTTON_ID = "add-to-cart-button"
+ADDED_TO_CART_TEXT_CLASS_NAME = "sw-atc-text"
+PRODUCT_PAGE_PRODUCT_TITLE_ID = "productTitle"
 
 
 class AmazonStoreHandler(object):
 
-    def __init__(self, driver_path=DRIVER_PATH, headless=True):
+    def __init__(self, driver_path=DRIVER_PATH):
         # Initializes Web Browser
         chrome_options = webdriver.ChromeOptions()
-
-        # Uncomment If Want Headless
-        if headless:
-            chrome_options.add_argument('--headless')
 
         self.service = Service(driver_path)
         self.service.start()
@@ -152,9 +151,12 @@ class AmazonStoreHandler(object):
         self.web_driver_wait.until(expected_conditions.
                                    visibility_of_element_located((By.CLASS_NAME, "s-pagination-strip")))
 
-        elements = self.driver.find_elements(By.XPATH, '//div[@data-component-type="s-search-result"]')
-
-        desired_product = elements[item_index]
+        elements = self.driver.find_elements(By.XPATH, SEARCH_RESULTS_XPATH)
+        search_results = []
+        for element in elements:
+            if "AdHolder" not in element.get_attribute("class"):
+                search_results.append(element)
+        desired_product = search_results[item_index]
 
         product_name = desired_product.find_element(By.TAG_NAME, "h2")
         product_name = product_name.find_element(By.TAG_NAME, "a")
@@ -162,19 +164,19 @@ class AmazonStoreHandler(object):
 
         # Wait For The Page To Load
         self.web_driver_wait.until(expected_conditions.
-                                   visibility_of_element_located((By.ID, "productTitle")))
+                                   visibility_of_element_located((By.ID, PRODUCT_PAGE_PRODUCT_TITLE_ID)))
 
         # Wait For Add To Cart Button To Appear
         self.web_driver_wait.until(expected_conditions.
-                                   visibility_of_element_located((By.ID, "add-to-cart-button")))
+                                   visibility_of_element_located((By.ID, ADD_TO_CART_BUTTON_ID)))
 
         # Click Add To Cart
-        add_to_cart_button = self.driver.find_element(By.ID, "add-to-cart-button")
+        add_to_cart_button = self.driver.find_element(By.ID, ADD_TO_CART_BUTTON_ID)
         add_to_cart_button.click()
 
         # Wait For Added To Cart Text To Appear
         self.web_driver_wait.until(expected_conditions.
-                                   visibility_of_element_located((By.CLASS_NAME, "sw-atc-text")))
+                                   visibility_of_element_located((By.CLASS_NAME, ADDED_TO_CART_TEXT_CLASS_NAME)))
         return
 
     def get_number_of_items_in_cart(self):

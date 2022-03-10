@@ -11,7 +11,7 @@ class AmazonFailedLogin(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.amazon_store_handler = AmazonStoreHandler(headless=False)
+        cls.amazon_store_handler = AmazonStoreHandler()
         return
 
     def test_amazon_failed_login(self):
